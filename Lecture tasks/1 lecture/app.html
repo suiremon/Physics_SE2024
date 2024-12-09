@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Преобразование координат</title>
+  <style>
+    #coordinates {
+      display: flex;
+      flex-direction: column;
+      margin-top: 20px;
+    }
+    #coordinates label {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Преобразование координат</h1>
+
+  <label for="conversionType">Выберите преобразование:</label>
+  <select id="conversionType">
+    <option value="cartesian2d_to_polar">Декартовы (2D) -> Полярные</option>
+    <option value="polar_to_cartesian2d">Полярные -> Декартовы (2D)</option>
+    <option value="cartesian3d_to_spherical">Декартовы (3D) -> Сферические</option>
+    <option value="spherical_to_cartesian3d">Сферические -> Декартовы (3D)</option>
+    <option value="cartesian3d_to_cylindrical">Декартовы (3D) -> Цилиндрические</option>
+    <option value="cylindrical_to_cartesian3d">Цилиндрические -> Декартовы (3D)</option>
+  </select>
+
+  <label for="precision">Точность (знаков после запятой):</label>
+  <input type="number" id="precision" min="0" value="2">
+
+  <div id="coordinates">
+  </div>
+
+  <button onclick="convert()">Преобразовать</button>
+
+  <div id="result">
+  </div>
+
+  <script>
+    const conversionTypeSelect = document.getElementById('conversionType');
+    const precisionInput = document.getElementById('precision');
+    const coordinatesDiv = document.getElementById('coordinates');
+    const resultDiv = document.getElementById('result');
+
+    function updateCoordinates() {
+      coordinatesDiv.innerHTML = '';
+
+      const conversionType = conversionTypeSelect.value;
+      let numCoordinates;
+
+      if (conversionType === 'cartesian2d_to_polar' ||
+          conversionType === 'polar_to_cartesian2d') {
+        numCoordinates = 2;
+      } else {
+        numCoordinates = 3;
+      }
+
+      for (let i = 1; i <= numCoordinates; i++) {
+        const label = document.createElement('label');
+        label.textContent = `Координата ${i}:`;
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = `coord${i}`;
+
+        coordinatesDiv.appendChild(label);
+        coordinatesDiv.appendChild(input);
+        coordinatesDiv.appendChild(document.createElement('br'));
+      }
+    }
+
+    function convert() {
+      const conversionType = conversionTypeSelect.value;
+      const precision = parseInt(precisionInput.value);
+
+      let x, y, z, r, theta, phi;
+
+      if (conversionType === 'cartesian2d_to_polar') {
+        x = parseFloat(document.getElementById('coord1').value);
+        y = parseFloat(document.getElementById('coord2').value);
+
+        r = Math.sqrt(x * x + y * y);
+        theta = Math.atan2(y, x);
+      } else if (conversionType === 'polar_to_cartesian2d') {
+        r = parseFloat(document.getElementById('coord1').value);
+        theta = parseFloat(document.getElementById('coord2').value) * Math.PI / 180;
+
+        x = r * Math.cos(theta);
+        y = r * Math.sin(theta);
+      } else if (conversionType === 'cartesian3d_to_spherical') {
+        x = parseFloat(document.getElementById('coord1').value);
+        y = parseFloat(document.getElementById('coord2').value);
+        z = parseFloat(document.getElementById('coord3').value);
+
+        r = Math.sqrt(x * x + y * y + z * z);
+        theta = Math.acos(z / r);
+        phi = Math.atan2(y, x);
+      } else if (conversionType === 'spherical_to_cartesian3d') {
+        r = parseFloat(document.getElementById('coord1').value);
+        theta = parseFloat(document.getElementById('coord2').value) * Math.PI / 180;
+        phi = parseFloat(document.getElementById('coord3').value) * Math.PI / 180;
+
+        x = r * Math.sin(theta) * Math.cos(phi);
+        y = r * Math.sin(theta) * Math.sin(phi);
+        z = r * Math.cos(theta);
+      } else if (conversionType === 'cartesian3d_to_cylindrical') {
+        x = parseFloat(document.getElementById('coord1').value);
+        y = parseFloat(document.getElementById('coord2').value);
+        z = parseFloat(document.getElementById('coord3').value);
+
+        r = Math.sqrt(x * x + y * y);
+        theta = Math.atan2(y, x);
+      } else if (conversionType === 'cylindrical_to_cartesian3d') {
+        r = parseFloat(document.getElementById('coord1').value);
+        theta = parseFloat(document.getElementById('coord2').value) * Math.PI / 180;
+        z = parseFloat(document.getElementById('coord3').value);
+
+        x = r * Math.cos(theta);
+        y = r * Math.sin(theta);
+      }
+
+      resultDiv.innerHTML = '';
+      if (conversionType === 'cartesian2d_to_polar') {
+        resultDiv.innerHTML = `
+          <p>r: ${r.toFixed(precision)}</p>
+          <p>φ: ${(theta * 180 / Math.PI).toFixed(precision)}°</p>
+        `;
+      } else if (conversionType === 'polar_to_cartesian2d') {
+        resultDiv.innerHTML = `
+          <p>x: ${x.toFixed(precision)}</p>
+          <p>y: ${y.toFixed(precision)}</p>
+        `;
+      } else if (conversionType === 'cartesian3d_to_spherical') {
+        resultDiv.innerHTML = `
+          <p>r: ${r.toFixed(precision)}</p>
+          <p>θ: ${(theta * 180 / Math.PI).toFixed(precision)}°</p>
+          <p>φ: ${(phi * 180 / Math.PI).toFixed(precision)}°</p>
+        `;
+      } else if (conversionType === 'spherical_to_cartesian3d') {
+        resultDiv.innerHTML = `
+          <p>x: ${x.toFixed(precision)}</p>
+          <p>y: ${y.toFixed(precision)}</p>
+          <p>z: ${z.toFixed(precision)}</p>
+        `;
+      } else if (conversionType === 'cartesian3d_to_cylindrical') {
+        resultDiv.innerHTML = `
+          <p>r: ${r.toFixed(precision)}</p>
+          <p>θ: ${(theta * 180 / Math.PI).toFixed(precision)}°</p>
+          <p>z: ${z.toFixed(precision)}</p>
+        `;
+      } else if (conversionType === 'cylindrical_to_cartesian3d') {
+        resultDiv.innerHTML = `
+          <p>x: ${x.toFixed(precision)}</p>
+          <p>y: ${y.toFixed(precision)}</p>
+          <p>z: ${z.toFixed(precision)}</p>
+        `;
+      }
+    }
+
+    conversionTypeSelect.addEventListener('change', updateCoordinates);
+
+    updateCoordinates();
+  </script>
+</body>
+</html>
